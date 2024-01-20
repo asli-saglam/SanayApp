@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "proje_odev" "\0"
+            VALUE "FileDescription", "sanayapp2" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "proje_odev" "\0"
+            VALUE "InternalName", "sanayapp2" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "proje_odev.exe" "\0"
-            VALUE "ProductName", "proje_odev" "\0"
+            VALUE "OriginalFilename", "sanayapp2.exe" "\0"
+            VALUE "ProductName", "sanayapp2" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

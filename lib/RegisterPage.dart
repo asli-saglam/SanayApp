@@ -1,71 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:sanayapp2/Notification/FirebaseApi.dart';
-import 'package:sanayapp2/Notification/notification.dart';
+import 'package:sanayapp2/HomePage.dart';
 import 'package:sanayapp2/helpers/ShowSnackBar.dart';
 import 'package:sanayapp2/helpers/colorPalette.dart';
-import 'package:sanayapp2/HomePage.dart';
-import 'package:sanayapp2/RegisterPage.dart';
-import 'firebase_options.dart';
+import 'package:sanayapp2/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  await FirebaseApi().initNotifications();
-
-  //requestPermission();
-  //getToken("email");
-
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key});
+class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({Key? key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const LoginPage(),
-    );
-  }
+  State<RegistrationPage> createState() => _RegistrationPageState();
 }
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key});
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+class _RegistrationPageState extends State<RegistrationPage> {
   final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  void showToastMessage(String message) {}
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  void girisYap(BuildContext context) async {
-    var querySnapshot = await _firestore
+  void kayitOl(BuildContext context) async {
+    var querySnapshot = await firestore
         .collection('users')
         .where('email', isEqualTo: _emailController.text)
         .get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      var user = querySnapshot.docs.first;
+    if (querySnapshot.docs.isEmpty) {
+      Map<String, dynamic> eklenecekUser = {
+        'email': _emailController.text,
+        'name': _usernameController.text,
+        'password': _passwordController.text
+      };
 
-      if (user['password'] == _passwordController.text) {
+      await firestore.collection('users').add(eklenecekUser).then((value) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -74,13 +42,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         );
-        showSnackbar(context, "Başarıyla Giriş Yapıldı", snackBarSuccess);
-        saveToken(_emailController.text);
-      } else {
-        showSnackbar(context, "Yanlış Şifre Girdiniz", snackBarDanger);
-      }
+        showSnackbar(context, "Başarıyla Kayıt Olundu", snackBarSuccess);
+      });
     } else {
-      showSnackbar(context, "Bu e-posta adresine sahip kullanıcı bulunamadı.",
+      showSnackbar(context, "Bu e-posta adresine sahip kullanıcı zaten var.",
           snackBarDanger);
     }
   }
@@ -102,13 +67,38 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                height: 55,
+                height: 40,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 margin: const EdgeInsets.only(
                     left: 85, right: 85, top: 130, bottom: 10),
+                padding: const EdgeInsets.only(
+                    left: 10, right: 10, top: 0, bottom: 0),
+                child: TextFormField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    hintText: 'İsim Soyisim',
+                    labelStyle: TextStyle(fontFamily: 'Arial', fontSize: 20),
+                    border: InputBorder.none,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                margin: const EdgeInsets.only(
+                    left: 85, right: 85, top: 7, bottom: 10),
                 padding: const EdgeInsets.only(
                     left: 10, right: 10, top: 0, bottom: 0),
                 child: TextFormField(
@@ -120,14 +110,14 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Email boş bırakılamaz';
+                      return '';
                     }
                     return null;
                   },
                 ),
               ),
               Container(
-                height: 55,
+                height: 40,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -137,8 +127,8 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.only(
                     left: 10, right: 10, top: 0, bottom: 0),
                 child: TextFormField(
-                  controller: _passwordController,
                   obscureText: true,
+                  controller: _passwordController,
                   decoration: const InputDecoration(
                     hintText: 'Şifre',
                     labelStyle: TextStyle(fontFamily: 'Arial', fontSize: 20),
@@ -146,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Şifre boş bırakılamaz';
+                      return '';
                     }
                     return null;
                   },
@@ -162,24 +152,29 @@ class _LoginPageState extends State<LoginPage> {
                     backgroundColor: Color(iconsColor)),
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
-                    girisYap(context);
+                    kayitOl(context);
+                  } else {
+                    showSnackbar(context, "Email ve Şifre Boş Bırakılamaz",
+                        snackBarDanger);
                   }
                 },
-                child: const Text('Giriş Yap',
-                    style: TextStyle(color: Colors.white)),
+                child: const Text(
+                  'Kayıt Ol',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 10), // Boşluk ekleyebilirsiniz
               InkWell(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const RegistrationPage(),
+                      builder: (context) => const MyApp(),
                     ),
                   );
                 },
                 child: const Text(
-                  'Hesabınız yok mu?',
+                  'Zaten Hesabınız Var Mı?',
                   style: TextStyle(
                     color: Color(0xFF31304D),
                   ),

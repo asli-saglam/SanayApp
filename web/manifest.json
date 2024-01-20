@@ -1,6 +1,6 @@
 {
-    "name": "proje_odev",
-    "short_name": "proje_odev",
+    "name": "sanayapp2",
+    "short_name": "sanayapp2",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
